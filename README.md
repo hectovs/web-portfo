@@ -32,3 +32,19 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Systems Diagrams 
+```mermaid
+  sequenceDiagram;
+      participant User
+      participant Client
+      participant Google Maps Api
+      participant TomTomApi
+      User->>Client: Inputs place of work and home
+      Client->>Client: Finds centroid in terms of lat and lon, and half length of chord turned into radius. 
+      Client->>Google Maps Api: Request Fuel stations using centroid and radius (Places nearby search api)
+      Google Maps Api->>Client: returns Fuel stations
+      Client->>TomTomApi: Request for fuel prices at each fuel station
+      TomTomApi->>Client:Returns fuel prices at each fuel station
+```
+
