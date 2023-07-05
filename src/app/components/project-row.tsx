@@ -1,4 +1,4 @@
-export default function ProjectRow({columns, project }:{columns: Array<String>, project: object}){
+export default function ProjectRow({columns, project }:{columns: Array<{"inJson" :string, "display": string}>, project: {"id":number}}){
     return ( 
         <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
             {
