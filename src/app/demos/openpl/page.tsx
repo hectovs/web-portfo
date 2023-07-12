@@ -121,6 +121,7 @@ export default function openPl(){
 
     useMemo(()=>{
         //transforms data into scatterData
+        //refactor this a lot of variables created - do this programmatically based on an object that relates lift name to key in the openPL object
         let newScatterData : ChartData<"scatter"> = {
             datasets: []
             
@@ -186,7 +187,7 @@ export default function openPl(){
                     if(lift in meet){
                         if(meet[lift] > 0 ){
                             attemptsMade++
-                        } else { 
+                        } else if(meet[lift] < 0 ) { 
                             attemptsMissed++
                         }
                     }
@@ -202,6 +203,8 @@ export default function openPl(){
     
     //TODO CSS to put resetZoom button in a good place and work with screen resizes 
     //TODO write a rust wasm to do the curve fit and therefore projection into the future based on dots 
+    //TODO deal with bench only meets in the chart 
+    //TODO deal with meets where attempts are not reported only best lifts 
     
     if (isLoading) return <p>Loading...</p>
     if (!data) return <p>No profile data</p>
