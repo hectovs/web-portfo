@@ -1,6 +1,6 @@
 "use client"
 
-import { NextFetchEvent } from "next/server"
+import EditTable from "@/app/components/edit-table"
 import {useCallback, useEffect, useMemo, useRef, useState} from "react"
 import  Papa  from "papaparse"
 import { Doughnut, Scatter } from "react-chartjs-2"
@@ -24,6 +24,12 @@ import { Chart as ChartJS,
 
 
 ChartJS.register(ArcElement, CategoryScale, LineElement, LinearScale, PointElement, TimeScale, Title, Tooltip, Legend, zoomPlugin)
+
+function randomHexColor(){
+    let n = (Math.random() * 0xfffff * 1000000).toString(16)
+    return "#" + n.slice(0,6); 
+}
+
 
 export default function openPl(){
 
@@ -95,6 +101,64 @@ export default function openPl(){
     const [scatterData, setScatterData] = useState<ChartData<"scatter">>({
         datasets:[]
     })
+    const [equipment, setEquipment] = useState<string[]>(["Raw"]) //Raw | Single-Ply | Multi-Ply | Raw + Wraps
+    const [event, setEvent] = useState<string[]>(["SBD"]) //SBD for Squat Bench Deadlift, B for Bench only
+
+    const [chartDataDisplay, setChartDataDisplay]  = useState<object[]>([
+        {
+            "jsonKey": "Best3SquatKg",
+            "displayName" : "Squat", 
+        },
+        {
+            "jsonKey" : "Best3BenchKg", 
+            "displayName" : "Bench"
+        },
+        {
+            "jsonKey" : "Best3DeadliftKg",
+            "displayName" : "Deadlift"
+        },
+        {
+            "jsonKey" : "TotalKg", 
+            "displayName" : "Total"
+        },
+        {
+            "jsonKey" : "Dots", 
+            "displayName" : "Dots"
+        }
+    ])
+
+
+    const [tableDataDisplay, setTableDataDisplay] =useState<object[]>([
+        {
+            "jsonKey": "Best3SquatKg",
+            "displayName" : "Squat", 
+        },
+        {
+            "jsonKey" : "Best3BenchKg", 
+            "displayName" : "Bench"
+        },
+        {
+            "jsonKey" : "Best3DeadliftKg",
+            "displayName" : "Deadlift"
+        },
+        {
+            "jsonKey" : "TotalKg", 
+            "displayName" : "Total"
+        },
+        {
+            "jsonKey" : "Dots", 
+            "displayName" : "Dots"
+        },
+        {
+            "jsonKey" : "Date", 
+            "displayName" : "Date", 
+        },
+        {
+            "jsonKey" : "MeetName",
+            "displayName" : "Meet Name"
+        }
+
+    ])
 
     const [successMetricLifts, setSuccessMetricLifts ] = useState<string[]>([
         "Squat1Kg", "Squat2Kg", "Squat3Kg",
@@ -124,47 +188,31 @@ export default function openPl(){
         //refactor this a lot of variables created - do this programmatically based on an object that relates lift name to key in the openPL object
         let newScatterData : ChartData<"scatter"> = {
             datasets: []
-            
         }; 
-        var totalDataset =  { 
-            label: 'Total',
-            borderColor: "rgb(0, 255, 0)",
-            data:[]
-        }
-        var squatDataset = { 
-            label: 'Squat',
-            borderColor: "rgb(255, 0, 0)",
-            data:[]
-        }
-        var benchDataset = {
-            label: 'Bench',
-            borderColor: "rgb(0, 0, 255)",
-            data:[]
-        }
-        var deadliftDataset = { 
-            label: 'Deadlift',
-            borderColor: "rgb(0, 255, 255)",
-            data:[]
-        }
-        var dotsDataset = {
-            label: 'Dots',
-            borderColor: "rgb(255, 255, 0)",
-            data:[]
-        }
+
         if(data.length > 0 ){
-            data.forEach((meet)=>{
-                const utc = Date.parse(meet["Date"])
-                if("TotalKg" in meet){
-                    totalDataset["data"].push({y:meet["TotalKg"], x: utc})
-                    squatDataset["data"].push({y:meet["Best3SquatKg"], x:utc})
-                    benchDataset["data"].push({y:meet["Best3BenchKg"], x:utc})
-                    deadliftDataset["data"].push({y:meet["Best3DeadliftKg"], x:utc})
-                    dotsDataset["data"].push({y:meet["Dots"], x:utc})
+            chartDataDisplay.forEach((displayObj)=>{
+                var dataset = { 
+                    label: displayObj["displayName"], 
+                    borderColor:  randomHexColor(), 
+                    data:[]
                 }
+
+                data.forEach((meet)=>{
+                    const utc = Date.parse(meet["Date"])
+                    if(event.includes(meet["Event"]) && equipment.includes(meet["Equipment"]) ){
+                        if(displayObj["jsonKey"] in meet){
+                            if(meet[displayObj["jsonKey"]] !== ""){
+                                dataset["data"].push({y: meet[displayObj["jsonKey"]] , x: utc})
+                            }
+                        }
+                    }
+                })
+
+                newScatterData.datasets.push(dataset)
             })
         }
 
-        newScatterData.datasets.push(totalDataset, squatDataset, benchDataset, deadliftDataset, dotsDataset)
         console.log(newScatterData)
         setScatterData(newScatterData)
     },[data])
@@ -185,9 +233,9 @@ export default function openPl(){
             data.forEach((meet)=>{
                 successMetricLifts.forEach((lift)=>{
                     if(lift in meet){
-                        if(meet[lift] > 0 ){
+                        if(meet[lift] > 0 && meet[lift] !== ""){
                             attemptsMade++
-                        } else if(meet[lift] < 0 ) { 
+                        } else if(meet[lift] < 0 && meet[lift] !== "") {
                             attemptsMissed++
                         }
                     }
@@ -203,8 +251,9 @@ export default function openPl(){
     
     //TODO CSS to put resetZoom button in a good place and work with screen resizes 
     //TODO write a rust wasm to do the curve fit and therefore projection into the future based on dots 
-    //TODO deal with bench only meets in the chart 
-    //TODO deal with meets where attempts are not reported only best lifts 
+
+    //give the ability to alter the entries on the line chart -> create a modifiable table from the JSON 
+
     
     if (isLoading) return <p>Loading...</p>
     if (!data) return <p>No profile data</p>
@@ -216,7 +265,7 @@ export default function openPl(){
     }
 
     return(
-        <div>
+        <div className="w-full">
             <div className="w-full py-2 px-4 flex flex-row relative">
                 <div className="w-1/2 left-0 flex relative">
                     <div className="grow absolute top-0 right-0 py-6">
@@ -241,6 +290,10 @@ export default function openPl(){
                     </button> 
                 </div>
             </div>
+
+            <EditTable columns={tableDataDisplay} data={data}>
+
+            </EditTable>
         </div>
     )
 }
