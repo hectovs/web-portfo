@@ -277,8 +277,8 @@ export default function openPl(){
                         <Scatter ref={scatterRef} data={scatterData} options={scatterOptions} />
                     </div>
                 </div>
-                <div className="w-1/2 h-[50vh] flex justify-center" >
-                    <Doughnut className="right-0 h-[50vh]" ref={doughnutRef} data={doughnutData} />
+                <div className="w-1/2 flex" >
+                    <Doughnut height={"50vh"} options={{ maintainAspectRatio: false }} ref={doughnutRef} data={doughnutData} />
                 </div>
             </div>
 
@@ -291,9 +291,8 @@ export default function openPl(){
                 </div>
             </div>
 
-            <EditTable columns={tableDataDisplay} data={data}>
+            <EditTable columns={tableDataDisplay} data={data} update_data={setData} />
 
-            </EditTable>
         </div>
     )
 }
