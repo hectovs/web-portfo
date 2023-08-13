@@ -156,6 +156,14 @@ export default function openPl(){
         {
             "jsonKey" : "MeetName",
             "displayName" : "Meet Name"
+        }, 
+        {
+            "jsonKey" : "Event",
+            "displayName" : "Event"
+        }, 
+        {
+            "jsonKey" : "Equipment",
+            "displayName" : "equipment"
         }
 
     ])
@@ -185,7 +193,6 @@ export default function openPl(){
 
     useMemo(()=>{
         //transforms data into scatterData
-        //refactor this a lot of variables created - do this programmatically based on an object that relates lift name to key in the openPL object
         let newScatterData : ChartData<"scatter"> = {
             datasets: []
         }; 
@@ -208,7 +215,7 @@ export default function openPl(){
                         }
                     }
                 })
-
+                dataset["data"].sort((a,b)=>(a.x-b.x))
                 newScatterData.datasets.push(dataset)
             })
         }
@@ -248,6 +255,10 @@ export default function openPl(){
         setDoughnutData({...doughnutData, "datasets": [newDoughnutDataset]})
 
     },[successMetricLifts, data])
+
+    useEffect(()=>{
+        console.log(data)
+    }, [data])
     
     //TODO CSS to put resetZoom button in a good place and work with screen resizes 
     //TODO write a rust wasm to do the curve fit and therefore projection into the future based on dots 
