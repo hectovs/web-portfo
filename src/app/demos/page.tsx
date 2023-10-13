@@ -24,23 +24,7 @@ export default function Demos(){
             display: "Name",
             inJson: "name"
         },
-        {
-            display:"Description",
-            inJson: "language"
-        },
-        {
-            display:"Link",
-            inJson: "uri"
-        }
     ])
-
-
-
-    useEffect(() => { 
-        
-
-    }, [])
-
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-between p-24">
@@ -64,8 +48,8 @@ export default function Demos(){
                             demos.map((demo)=>{
                                 return(
                                     <DemoRow key={demo["id"]} columns={displayColumns} demo={demo} />
-                                    )
-                                })
+                                )
+                            })
                         }
                     </tbody>
                 </table>
